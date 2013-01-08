@@ -1,0 +1,10 @@
+x<-read.table("ConnectivityAndAllenExpressionMatrixPair.Connectivity.NewEnergies.forPlotting.txt")
+x<-read.table("ConnectivityAndAllenPartialExpressionMatrixPair.Connectivity.Residuals(LogEuclidianDistance).NewEnergies.forPlotting.txt")
+x<-read.table("ConnectivityAndAllenPartialExpressionMatrixPair.Connectivity.Residuals(LogEuclidianDistance).NewEnergies.Residuals(LogEuclidianDistance).forPlotting.txt")
+plot(x)
+png("ConnectivityAndAllenExpressionMatrixPair.forPlotting.incoming.png", width=800, height=600) 
+plot(x)
+abline(lm(x[,"NewEnergies"] ~ x[,"Connectivity"]), col="red")
+dev.off()
+which(x==1, arr.ind=TRUE)
+rownames(x)[which(x[,1]>.6, arr.ind=TRUE)]

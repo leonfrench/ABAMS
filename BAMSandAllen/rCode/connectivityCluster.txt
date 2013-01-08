@@ -1,0 +1,17 @@
+con <- read.table("ConnectivityAndAllenExpressionMatrixPair.Connectivity.txt") 
+dim(con)
+con <- con[rowSums(con[,-1]^2) > 0, ]
+con <- as.matrix(con)
+dim(con)
+hmap <- heatmap(con, keep.dendro=TRUE, margins=c(14,1), Rowv=NA, scale="none", labRow=NA)
+
+png("connectivityClustered.png", width=1200, height=1000) 
+heatmap(con, keep.dendro=TRUE, margins=c(14,1), Rowv=NA, scale="none", labRow=NA)
+dev.off()
+
+png("connectivityClusteredCorrelation.png", width=1200, height=1000) 
+heatmap(cor(con), keep.dendro=TRUE, margins=c(14,1), Rowv=NA, scale="none", labRow=NA)
+dev.off()
+
+
+plot(hmap$Colv)
