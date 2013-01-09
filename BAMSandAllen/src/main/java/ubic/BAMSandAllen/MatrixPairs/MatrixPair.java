@@ -556,12 +556,14 @@ public abstract class MatrixPair implements Serializable {
      */
 
     public double getFlattenedCorrelation( boolean spearman ) throws Exception {
-        // are they in the right order?
         boolean removeNan = true;
         DoubleMatrix<String, String> matrixASums = Util.columnSums( matrixA, removeNan );
         DoubleMatrix<String, String> matrixBSums = Util.columnSums( matrixB, removeNan );
+
+        // are they in the right order?
         if ( !matrixASums.getColNames().equals( matrixB.getColNames() ) )
             throw new RuntimeException( "Error column names do not match" );
+        
         double[] matrixAVec = matrixASums.getRow( 0 );
         double[] matrixBVec = matrixBSums.getRow( 0 );
         if ( !spearman ) {

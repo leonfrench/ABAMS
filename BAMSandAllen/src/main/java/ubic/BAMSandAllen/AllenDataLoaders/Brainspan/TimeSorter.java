@@ -30,7 +30,7 @@ public class TimeSorter implements Comparator<String> {
 
     public int getUnitValue( String a ) {
         if ( a.contains( "yrs" ) ) return 20000;
-        if ( a.contains( "mos" ) ) return 10000;
+        if ( a.contains( "mos" ) || a.contains( "mo" )) return 10000;
         if ( a.contains( "pcw" ) ) return 0;
         return 0;
     }

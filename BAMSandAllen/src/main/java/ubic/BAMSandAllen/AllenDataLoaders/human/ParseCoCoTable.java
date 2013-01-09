@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
-package ubic.BAMSandAllen.human;
+ ******************************************************************************/package ubic.BAMSandAllen.AllenDataLoaders.human;
 
 import java.net.URLEncoder;
 import java.util.HashMap;

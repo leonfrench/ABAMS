@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
-package ubic.BAMSandAllen.human;
+ ******************************************************************************/package ubic.BAMSandAllen.AllenDataLoaders.human;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -59,7 +58,7 @@ public class LoadHumanCSV {
         this.ID = ID;
         try {
             DoubleMatrixReader reader = new DoubleMatrixReader();
-//            reader.setTopLeft( false );
+            // reader.setTopLeft( false );
 
             String filename = "";
             if ( ID.equals( "9861" ) )
@@ -198,8 +197,9 @@ public class LoadHumanCSV {
         }
 
         log.info( matrix.rows() + " x " + matrix.columns() );
-        Util.writeRTable( "C:\\Users\\leon\\Desktop\\Human array\\" + ID + "\\matrix." + matrix.rows() + " x "
-                + matrix.columns() + ".txt", matrix );
+        Util.writeRTable(
+                "C:\\Users\\leon\\Desktop\\Human array\\" + ID + "\\matrix." + matrix.rows() + " x " + matrix.columns()
+                        + ".txt", matrix );
     }
 
     /**
@@ -316,8 +316,6 @@ public class LoadHumanCSV {
     public ABAMSDataMatrix getMatrix() {
         return matrix;
     }
-
-
 
     public static void main( String[] args ) throws Exception {
         String base = "C:\\Users\\leon\\Desktop\\Human array\\";

@@ -29,11 +29,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import ubic.BAMSandAllen.ABAMSDataMatrix;
+import ubic.BAMSandAllen.AnalyzeBAMSandAllenGenes.Direction;
 import ubic.BAMSandAllen.RankedGeneListLoader;
 import ubic.BAMSandAllen.SetupParameters;
 import ubic.BAMSandAllen.Util;
 import ubic.BAMSandAllen.AllenDataLoaders.ImageSeriesInfoLoader;
-import ubic.BAMSandAllen.AnalyzeBAMSandAllenGenes.Direction;
 import ubic.BAMSandAllen.FocusedAnalysis.CellTypes;
 import ubic.BAMSandAllen.MatrixPairs.ExpressionMatrixPairFactory;
 import ubic.BAMSandAllen.geneFilters.GeneFilter;
@@ -41,6 +41,7 @@ import ubic.BAMSandAllen.geneFilters.PlaneRemoveFilter;
 import ubic.basecode.dataStructure.CountingMap;
 import ubic.basecode.dataStructure.StringToStringSetMap;
 import ubic.basecode.dataStructure.params.ParamKeeper;
+import ubic.basecode.util.FileTools;
 import au.com.bytecode.opencsv.CSVReader;
 
 //Given a NCBI gene for mouse gene
@@ -111,11 +112,12 @@ public class HomoloGeneLoader {
         return clusterIDtoSpecies.get( ClusterID );
     }
 
-    public String getMouseIDFromClusterID( String clusterID ) {
+    public Set<String> getMouseIDsFromClusterID( String clusterID ) {
+        Set<String> result = new HashSet<String>();
         for ( String key : mouseIDtoCluster.keySet() ) {
-            if ( mouseIDtoCluster.get( key ).equals( clusterID ) ) return key;
+            if ( mouseIDtoCluster.get( key ).equals( clusterID ) ) result.add( key );
         }
-        return null;
+        return result;
     }
 
     public String getClusterIDFromWormSymbol( String sym ) {
@@ -325,10 +327,12 @@ public class HomoloGeneLoader {
             } else {
                 Set<String> species = loader.getSpecies( clusterID );
                 if ( species.contains( loader.MOUSESPECIES ) ) {
-                    String mouseID = loader.getMouseIDFromClusterID( clusterID );
-                    String mouseSymbol = geneInfo.getSymbolFromNCBIID( mouseID );
-                    log.info( wormGene + " hit, mouseID:" + mouseID + " " + mouseSymbol );
-                    if ( mouseSymbol != null ) mouseGenes.add( mouseSymbol );
+                    Set<String> mouseIDs = loader.getMouseIDsFromClusterID( clusterID );
+                    for ( String mouseID : mouseIDs ) {
+                        String mouseSymbol = geneInfo.getSymbolFromNCBIID( mouseID );
+                        log.info( wormGene + " hit, mouseID:" + mouseID + " " + mouseSymbol );
+                        mouseGenes.add( mouseSymbol );
+                    }
                 } else {
                     log.info( wormGene + " miss" );
                 }
@@ -419,8 +423,38 @@ public class HomoloGeneLoader {
         return result;
     }
 
+    public Set<String> convertHumanSymbolsToMouse( Collection<String> humanSyms ) throws Exception {
+        ImageSeriesInfoLoader geneInfo = new ImageSeriesInfoLoader();
+        Set<String> result = new HashSet<String>();
+
+        for ( String humanSym : humanSyms ) {
+            String cluster = humanSymboltoCluster.get( humanSym.toUpperCase() );
+            if ( cluster != null ) {
+                Set<String> mouseIDs = getMouseIDsFromClusterID( cluster );
+                for ( String mouseID : mouseIDs ) {
+                    String mouseSymbol = geneInfo.getSymbolFromNCBIID( mouseID );
+                    if ( mouseSymbol != null ) result.add( mouseSymbol );
+                }
+            }
+        }
+        return result;
+    }
+
     public static void main( String[] args ) throws Exception {
         HomoloGeneLoader loader = new HomoloGeneLoader();
+
+//        FileTools.stringsToFile( loader.convertHumanSymbolsToMouse( FileTools
+//                .getLines( "/home/leon/Desktop/temp/NeuroCartaAutism.txt" ) ),
+//                "/home/leon/Desktop/temp/NeuroCartaAutism.mouse.txt" );
+        FileTools.stringsToFile( loader.convertHumanSymbolsToMouse( FileTools
+                .getLines( "/home/leon/Desktop/temp/CarpeDB.txt" ) ),
+                "/home/leon/Desktop/temp/CarpeDB.mouse.txt" );
+        System.exit( 1 );
+        FileTools.stringsToFile( loader.convertHumanSymbolsToMouse( FileTools
+                .getLines( "/home/leon/MaternalSet/maternalunder.txt" ) ),
+                "/home/leon/MaternalSet/maternalunder.mouse.txt" );
+
+
         log.info( loader.getHumanSymbolFromMouseID( "320405" ).iterator().next() );
 
         // String endFile = "LOOGenesInOrder.outgoing.partialcon.txt";
