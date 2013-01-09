@@ -30,6 +30,7 @@ import ubic.BAMSandAllen.geneFilters.GeneFilter;
 import ubic.basecode.dataStructure.matrix.DenseDoubleMatrix;
 import ubic.basecode.dataStructure.matrix.DoubleMatrix;
 
+
 public class ABAMSDataMatrix extends DenseDoubleMatrix<String, String> {
 
     String name;
