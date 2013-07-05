@@ -17,7 +17,10 @@
  ******************************************************************************/
 package ubic.BAMSandAllen.AllenDataLoaders;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,66 +30,86 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import ubic.BAMSandAllen.SetupParameters;
-
 import au.com.bytecode.opencsv.CSVReader;
 
 public class BrainStructuresCSVLoader {
-    private static Log log = LogFactory.getLog( BrainStructuresCSVLoader.class.getName() );
+	private static Log log = LogFactory.getLog(BrainStructuresCSVLoader.class.getName());
 
-    Map<String, String> IDtoName;
+	Map<String, String> IDtoName;
 
-    public BrainStructuresCSVLoader() throws Exception {
-        IDtoName = new HashMap<String, String>();
-        CSVReader reader = new CSVReader( new FileReader( SetupParameters.config.getString( "abams.allenAtlasCSV" ) ) );
-        String[] line;
-        while ( null != ( line = reader.readNext() ) ) {
-            if ( line[0].startsWith( "StructureName" ) ) {
-                continue;
-            }
-            String name = line[0].trim();
-            String id = line[6].trim();
-            //log.info( name + "->" + id );
-            IDtoName.put( id, name );
-        }
-    }
+	public BrainStructuresCSVLoader() throws Exception {
+		IDtoName = new HashMap<String, String>();
+		String filename = SetupParameters.config.getString("abams.allenAtlasCSV");
+		log.info("filename:" + filename);
 
-    public String getName( String id ) {
-        return IDtoName.get( id );
-    }
+		CSVReader reader = new CSVReader(new FileReader(filename));
+		String[] line;
+		while (null != (line = reader.readNext())) {
+			if (line[0].startsWith("StructureName")) {
+				continue;
+			}
+			String name = line[0].trim();
 
-    public Collection<String> getNames() {
-        return IDtoName.values();
-    }
+			// deal with Midbrain raph√© nuclei problems on osx
+			if (Charset.defaultCharset().toString().equals("MacRoman")) {
+				name = new String(name.getBytes(), "UTF-8");
+			}
 
-    public String getID( String name ) {
-        for ( String id : getIDs() ) {
-            if ( getName( id ).equals( name ) ) return id;
-        }
-        return null;
-    }
+			String id = line[6].trim();
+			// log.info(name + " id:" + id);
+			// log.info( name + "->" + id );
+			IDtoName.put(id, name);
+		}
+	}
 
-    public Set<String> getIDs() {
-        return IDtoName.keySet();
-    }
+	public String getName(String id) {
+		return IDtoName.get(id);
+	}
 
-    /**
-     * quick and dirty
-     * 
-     * @param args
-     */
-    public static void main( String[] args ) throws Exception {
-        BrainStructuresCSVLoader loader = new BrainStructuresCSVLoader();
-        StructureCatalogLoader oldLoader = new StructureCatalogLoader();
+	public Collection<String> getNames() {
+		return IDtoName.values();
+	}
 
-        for ( String name : oldLoader.getRegions() ) {
-            String id = loader.getID( name );
-            log.info( id );
-            if ( id == null )
-                log.info( "Null:" + name );
-            else
-                log.info( loader.getID( name ) );
+	public String getID(String name) {
+		for (String id : getIDs()) {
+			if (getName(id).equals(name))
+				return id;
+		}
+		return null;
+	}
 
-        }
+	public Set<String> getIDs() {
+		return IDtoName.keySet();
+	}
 
-    }
+	/**
+	 * quick and dirty
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) throws Exception {
+		BrainStructuresCSVLoader loader = new BrainStructuresCSVLoader();
+		StructureCatalogLoader oldLoader = new StructureCatalogLoader();
+
+		String bad = loader.getName("160");
+		log.info(bad);
+		System.out.println("Default Charset=" + Charset.defaultCharset());
+		System.out.println("Default Charset=" + Charset.defaultCharset().toString().equals("MacRoman"));
+
+		System.exit(1);
+
+		log.info(loader.getID("Midbrain raphé nuclei") == null);
+		System.exit(1);
+
+		for (String name : oldLoader.getRegions()) {
+			String id = loader.getID(name);
+			log.info(id);
+			if (id == null)
+				log.info("Null:" + name);
+			else
+				log.info(loader.getID(name));
+
+		}
+
+	}
 }

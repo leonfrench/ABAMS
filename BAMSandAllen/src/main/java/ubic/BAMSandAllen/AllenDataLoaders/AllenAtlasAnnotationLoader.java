@@ -1,6 +1,8 @@
 package ubic.BAMSandAllen.AllenDataLoaders;
 
 import java.io.FileReader;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,8 +24,7 @@ import ubic.basecode.dataStructure.matrix.DoubleMatrix;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class AllenAtlasAnnotationLoader {
-	private static Log log = LogFactory.getLog(AllenAtlasAnnotationLoader.class
-			.getName());
+	private static Log log = LogFactory.getLog(AllenAtlasAnnotationLoader.class.getName());
 	Map<String, Set<Point3d>> atlasMap;
 	BrainStructuresCSVLoader apiLoader;
 
@@ -47,6 +48,7 @@ public class AllenAtlasAnnotationLoader {
 	}
 
 	public AllenAtlasAnnotationLoader(String filename) throws Exception {
+		log.info("Filename:" + filename + " charset: " + Charset.defaultCharset());
 		StructureCatalogLoader mainLoader = new StructureCatalogLoader();
 		apiLoader = new BrainStructuresCSVLoader();
 
@@ -58,8 +60,7 @@ public class AllenAtlasAnnotationLoader {
 		int maxy = 0;
 		int maxz = 0;
 		while (null != (line = reader.readNext())) {
-			if (line[0].startsWith("Comment")
-					|| line[0].startsWith("Dimensions")) {
+			if (line[0].startsWith("Comment") || line[0].startsWith("Dimensions")) {
 				continue;
 			}
 			int x = Integer.parseInt(line[0]);
@@ -78,11 +79,18 @@ public class AllenAtlasAnnotationLoader {
 			// log.info( "adding parents of " + name + ":" + parents );
 			for (String parent : parents) {
 				String parentID = apiLoader.getID(parent);
+				// log.info(Arrays.toString(line));
+				// code for logging null errors
+				if (parentID == null) {
+					log.info("NULL " + parent);
+					log.info(name);
+					System.exit(1);
+
+				}
 				addPoint(parentID, point);
 			}
 		}
-		log.info("Loaded:" + filename + " Maxx:" + maxx + " Maxy:" + maxy
-				+ " Maxz:" + maxz);
+		log.info("Loaded:" + filename + " Maxx:" + maxx + " Maxy:" + maxy + " Maxz:" + maxz);
 	}
 
 	public Set<Point3d> getVoxels(String regionName) {
@@ -130,8 +138,7 @@ public class AllenAtlasAnnotationLoader {
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
 		Map<Point3d, List<String>> points = getPointToRegionMap();
 		for (Point3d point : points.keySet()) {
-			result.put((int) point.x + "," + (int) point.y + ","
-					+ (int) point.z, points.get(point));
+			result.put((int) point.x + "," + (int) point.y + "," + (int) point.z, points.get(point));
 		}
 		return result;
 	}
@@ -149,6 +156,10 @@ public class AllenAtlasAnnotationLoader {
 
 	private void addPoint(String id, Point3d point) {
 		Set<Point3d> points = atlasMap.get(id);
+		if (id == null) {
+			log.info("NULL" + point.toString());
+			new RuntimeException().printStackTrace();
+		}
 		if (points == null) {
 			points = new HashSet<Point3d>();
 			atlasMap.put(id, points);
@@ -217,8 +228,7 @@ public class AllenAtlasAnnotationLoader {
 	 * @return
 	 */
 	public DoubleMatrix<String, String> getVolumeMatrix() {
-		DoubleMatrix<String, String> result = new DenseDoubleMatrix<String, String>(
-				1, apiLoader.getNames().size());
+		DoubleMatrix<String, String> result = new DenseDoubleMatrix<String, String>(1, apiLoader.getNames().size());
 
 		result.setColumnNames(new LinkedList<String>(apiLoader.getNames()));
 		result.addRowName("volume");
@@ -240,10 +250,9 @@ public class AllenAtlasAnnotationLoader {
 		return getPoints2Matrix(centers);
 	}
 
-	public DoubleMatrix<String, String> getPoints2Matrix(
-			Map<String, Point3d> points) {
-		DoubleMatrix<String, String> result = new DenseDoubleMatrix<String, String>(
-				3, points.size());
+	public DoubleMatrix<String, String> getPoints2Matrix(Map<String, Point3d> points) {
+		DoubleMatrix<String, String> result = new DenseDoubleMatrix<String, String>(3, points.size());
+		log.info(points.keySet());
 		result.setColumnNames(new LinkedList<String>(points.keySet()));
 		result.addRowName("x");
 		result.addRowName("y");
@@ -273,5 +282,7 @@ public class AllenAtlasAnnotationLoader {
 		log.info(atlas.getVoxels("Interstitial nucleus of Cajal"));
 		log.info(atlas.getVoxels("Nucleus of Darkschewitsch"));
 		log.info(atlas.getPointToRegionMap().get(new Point3d(40, 40, 40)));
+
+		atlas.getStringBasedPointToRegionMap();
 	}
 }
