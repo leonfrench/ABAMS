@@ -4,7 +4,7 @@ Tested on Ubuntu (desktop) and CentOS (server). Installation steps tested on pav
 
 h3. Setup steps
 
-* download ABAMSSupplements.zip file (151mb, 560mb uncompressed):  "https://docs.google.com/file/d/0B3w9lE7AjmJTb292NGpHYk12SGc/edit":https://docs.google.com/file/d/0B3w9lE7AjmJTb292NGpHYk12SGc/edit
+* download ABAMSSupplements.zip file (151mb, 560mb uncompressed):  https://drive.google.com/file/d/0B3w9lE7AjmJTb292NGpHYk12SGc/view?usp=sharing
 * install maven
 * install eclipse
 ** create M2_REPO variable to point to maven repository (usually ~/.m2)
